@@ -1,0 +1,10 @@
+{
+  "name": "Expand_World_Music",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/JereKuusela/valheim-expand_world_music",
+  "description": "Allows changing event and environment musics.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2202",
+    "JereKuusela-Expand_World_Data-1.12.0"
+  ]
+}
