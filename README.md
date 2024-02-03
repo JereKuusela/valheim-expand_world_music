@@ -17,6 +17,7 @@ Command `ew_musics` can be used list all available clips.
 - name: Identifier of the music.
 - clips: List of music files.
   - The file is relative to `config/expand_world/` folder.
+  - Remember to include the file extension.
   - Adding for example "../music/" to the beginning of the file path can be used to change the folder.
   - Original music names can also be used.
   - If multiple files are given, the game randomly chooses one of them.
