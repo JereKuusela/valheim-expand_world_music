@@ -13,28 +13,29 @@ public class Manager
   public static string Pattern = "expand_music*.yaml";
   public static List<MusicMan.NamedMusic> Originals = [];
 
-
+  // Check is different from EW Data to allow working on main menu.
+  public static bool IsServer() => !ZNet.instance || ZNet.instance.IsServer();
   public static void ToFile()
   {
-    if (Helper.IsClient()) return;
+    if (!IsServer()) return;
     if (File.Exists(FilePath)) return;
     var yaml = DataManager.Serializer().Serialize(MusicMan.instance.m_music.Select(Loader.ToData).ToList());
     File.WriteAllText(FilePath, yaml);
   }
   public static void FromFile()
   {
-    if (Helper.IsClient()) return;
+    if (!IsServer()) return;
     var yaml = DataManager.Read(Pattern);
     Set(yaml);
     Configuration.valueMusicData.Value = yaml;
   }
   public static void FromSetting(string yaml)
   {
-    if (Helper.IsClient()) Set(yaml);
+    if (!IsServer()) Set(yaml);
   }
   private static void Set(string yaml)
   {
-    if (Helper.IsServer() && Originals.Count == 0)
+    if (IsServer() && Originals.Count == 0)
       Originals = [.. MusicMan.instance.m_music];
     if (yaml == "") return;
     try
@@ -52,6 +53,9 @@ public class Manager
       }
       EWM.LogInfo($"Reloading music data ({data.Count} entries).");
       MusicMan.instance.m_music = data;
+      var current = MusicMan.instance.m_currentMusic?.m_name ?? "";
+      MusicMan.instance.Reset();
+      MusicMan.instance.StartMusic(current);
     }
     catch (Exception e)
     {
@@ -83,16 +87,13 @@ public class Manager
 }
 
 
-[HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.Start)), HarmonyPriority(Priority.Last)]
+[HarmonyPatch(typeof(MusicMan), nameof(MusicMan.Awake)), HarmonyPriority(Priority.Last)]
 public class InitializeContent
 {
   static void Postfix()
   {
     Loader.InitializeDefaultClips();
-    if (Helper.IsServer())
-    {
-      Manager.ToFile();
-      Manager.FromFile();
-    }
+    Manager.ToFile();
+    Manager.FromFile();
   }
 }
