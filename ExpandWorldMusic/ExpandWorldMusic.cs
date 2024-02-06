@@ -10,7 +10,7 @@ public class EWM : BaseUnityPlugin
 {
   public const string GUID = "expand_world_music";
   public const string NAME = "Expand World Music";
-  public const string VERSION = "1.1";
+  public const string VERSION = "1.2";
 #nullable disable
   public static ManualLogSource Log;
 #nullable enable
