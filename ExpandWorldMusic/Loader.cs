@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ExpandWorldData;
+using Service;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -66,12 +66,12 @@ public class Loader
     if (Clips.ContainsKey(path))
       return Clips[path];
     if (!File.Exists(path))
-      path = Path.Combine(EWD.YamlDirectory, path);
+      path = Path.Combine(Yaml.Directory, path);
     if (Clips.ContainsKey(path))
       return Clips[path];
     if (!File.Exists(path))
     {
-      EWM.LogWarning("Can't find audio clip at " + path);
+      Log.Warning("Can't find audio clip at " + path);
       return null;
     }
     var uri = "file:///" + path.Replace("\\", "/");
@@ -90,7 +90,7 @@ public class Loader
     }
     catch
     {
-      EWM.LogWarning("Failed to load audio clip at " + path);
+      Log.Warning("Failed to load audio clip at " + path);
     }
     return null;
   }

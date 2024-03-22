@@ -1,3 +1,6 @@
+- v1.3
+  - Updated for the new Expand World Data features.
+
 - v1.2
   - Fixes default values incorrectly being true instead of false (config was read wrong).
 

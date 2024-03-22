@@ -4,12 +4,13 @@ using System.IO;
 using System.Linq;
 using ExpandWorldData;
 using HarmonyLib;
+using Service;
 namespace ExpandWorld.Music;
 
 public class Manager
 {
   public static string FileName = "expand_music.yaml";
-  public static string FilePath = Path.Combine(EWD.YamlDirectory, FileName);
+  public static string FilePath = Path.Combine(Yaml.Directory, FileName);
   public static string Pattern = "expand_music*.yaml";
   public static List<MusicMan.NamedMusic> Originals = [];
 
@@ -19,7 +20,7 @@ public class Manager
   {
     if (!IsServer()) return;
     if (File.Exists(FilePath)) return;
-    var yaml = DataManager.Serializer().Serialize(MusicMan.instance.m_music.Select(Loader.ToData).ToList());
+    var yaml = Yaml.Serializer().Serialize(MusicMan.instance.m_music.Select(Loader.ToData).ToList());
     File.WriteAllText(FilePath, yaml);
   }
   public static void FromFile()
@@ -40,10 +41,10 @@ public class Manager
     if (yaml == "") return;
     try
     {
-      var data = DataManager.Deserialize<Data>(yaml, FileName).Select(Loader.FromData).ToList();
+      var data = Yaml.Deserialize<Data>(yaml, FileName).Select(Loader.FromData).ToList();
       if (data.Count == 0)
       {
-        EWM.LogWarning($"Failed to load any music data.");
+        Log.Warning($"Failed to load any music data.");
         return;
       }
       if (ExpandWorldData.Configuration.DataMigration && Helper.IsServer() && AddMissingEntries(data))
@@ -51,7 +52,7 @@ public class Manager
         // Watcher triggers reload.
         return;
       }
-      EWM.LogInfo($"Reloading music data ({data.Count} entries).");
+      Log.Info($"Reloading music data ({data.Count} entries).");
       MusicMan.instance.m_music = data;
       var current = MusicMan.instance.m_currentMusic?.m_name ?? "";
       MusicMan.instance.Reset();
@@ -59,8 +60,8 @@ public class Manager
     }
     catch (Exception e)
     {
-      EWM.LogError(e.Message);
-      EWM.LogError(e.StackTrace);
+      Log.Error(e.Message);
+      Log.Error(e.StackTrace);
     }
   }
   private static bool AddMissingEntries(List<MusicMan.NamedMusic> entries)
@@ -70,11 +71,11 @@ public class Manager
       missingKeys.Remove(item.m_name);
     if (missingKeys.Count == 0) return false;
     var missing = Originals.Where(item => missingKeys.Contains(item.m_name)).ToList();
-    EWM.LogWarning($"Adding {missing.Count} missing music to the expand_music.yaml file.");
+    Log.Warning($"Adding {missing.Count} missing music to the expand_music.yaml file.");
     foreach (var item in missing)
-      EWM.LogWarning(item.m_name);
+      Log.Warning(item.m_name);
     var yaml = File.ReadAllText(FilePath);
-    var data = DataManager.Serializer().Serialize(missing.Select(Loader.ToData));
+    var data = Yaml.Serializer().Serialize(missing.Select(Loader.ToData));
     // Directly appending is risky but necessary to keep comments, etc.
     yaml += "\n" + data;
     File.WriteAllText(FilePath, yaml);
@@ -82,7 +83,7 @@ public class Manager
   }
   public static void SetupWatcher()
   {
-    DataManager.SetupWatcher(Pattern, FromFile);
+    Yaml.SetupWatcher(Pattern, FromFile);
   }
 }
 
