@@ -31,7 +31,7 @@ public class Loader
     {
       alwaysFadeOut = music.m_alwaysFadeout,
       ambientMusic = music.m_ambientMusic,
-      clips = music.m_clips.Select(c => c?.name ?? "empty").ToArray(),
+      clips = music.m_clips.Where(c => c?.name != null).Select(c => c.name).ToArray(),
       fadeInTime = music.m_fadeInTime,
       loop = music.m_loop,
       name = music.m_name,
@@ -42,7 +42,9 @@ public class Loader
   public static void InitializeDefaultClips()
   {
     // Higher priority for actual music clips.
-    Clips = MusicMan.instance.m_music.SelectMany(m => m.m_clips).Distinct(new Comparer()).ToDictionary(c => c?.name ?? "empty", c => c);
+    Clips = MusicMan.instance.m_music.SelectMany(m => m.m_clips).Where(c => c?.name != null).Distinct(new Comparer()).ToDictionary(c => c.name, c => c);
+    // Old configs would have this, no need to show them a warning about it.
+    Clips["empty"] = null!;
     var clips = Resources.FindObjectsOfTypeAll<AudioClip>();
     foreach (var clip in clips)
     {
@@ -99,7 +101,7 @@ public class Loader
 public class Comparer : IEqualityComparer<AudioClip>
 {
   // Respawn has a null clip.
-  public bool Equals(AudioClip x, AudioClip y) => x?.name == y?.name;
+  public bool Equals(AudioClip x, AudioClip y) => x.name == y.name;
 
-  public int GetHashCode(AudioClip obj) => obj?.name.GetStableHashCode() ?? 0;
+  public int GetHashCode(AudioClip obj) => obj.name.GetStableHashCode();
 }

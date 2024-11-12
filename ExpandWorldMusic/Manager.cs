@@ -54,6 +54,7 @@ public class Manager
       }
       Log.Info($"Reloading music data ({data.Count} entries).");
       MusicMan.instance.m_music = data;
+      UpdateHashes();
       var current = MusicMan.instance.m_currentMusic?.m_name ?? "";
       MusicMan.instance.Reset();
       MusicMan.instance.StartMusic(current);
@@ -80,6 +81,17 @@ public class Manager
     yaml += "\n" + data;
     File.WriteAllText(FilePath, yaml);
     return true;
+  }
+  private static void UpdateHashes()
+  {
+    var mm = MusicMan.instance;
+    mm.m_musicHashes.Clear();
+    foreach (MusicMan.NamedMusic music in mm.m_music)
+    {
+      if (!music.m_enabled) continue;
+      if (music.m_clips.Length == 0 || music.m_clips[0] == null) continue;
+      mm.m_musicHashes.Add(music.m_name.GetStableHashCode(), music);
+    }
   }
   public static void SetupWatcher()
   {
