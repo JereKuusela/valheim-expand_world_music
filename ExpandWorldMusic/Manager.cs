@@ -26,7 +26,7 @@ public class Manager
   public static void FromFile()
   {
     if (!IsServer()) return;
-    var yaml = DataManager.Read(Pattern);
+    var yaml = DataManager.Read<Data, MusicMan.NamedMusic>(Pattern, Loader.FromData);
     Set(yaml);
     Configuration.valueMusicData.Value = yaml;
   }
@@ -41,7 +41,7 @@ public class Manager
     if (yaml == "") return;
     try
     {
-      var data = Yaml.Deserialize<Data>(yaml, FileName).Select(Loader.FromData).ToList();
+      var data = Yaml.Deserialize<Data>(yaml, "Music").Select(d => Loader.FromData(d, "Music")).ToList();
       if (data.Count == 0)
       {
         Log.Warning($"Failed to load any music data.");

@@ -10,13 +10,13 @@ namespace ExpandWorld.Music;
 public class Loader
 {
   public static Dictionary<string, AudioClip> Clips = [];
-  public static MusicMan.NamedMusic FromData(Data data)
+  public static MusicMan.NamedMusic FromData(Data data, string fileName)
   {
     return new()
     {
       m_alwaysFadeout = data.alwaysFadeOut,
       m_ambientMusic = data.ambientMusic,
-      m_clips = data.clips.Select(PreloadClipCoroutine).Where(c => c != null).Cast<AudioClip>().ToArray(),
+      m_clips = data.clips.Select(d => PreloadClipCoroutine(d, fileName)).Where(c => c != null).Cast<AudioClip>().ToArray(),
       m_enabled = true,
       m_fadeInTime = data.fadeInTime,
       m_loop = data.loop,
@@ -63,7 +63,7 @@ public class Loader
       Clips.Add(name, clip);
     }
   }
-  private static AudioClip? PreloadClipCoroutine(string path)
+  private static AudioClip? PreloadClipCoroutine(string path, string fileName)
   {
     if (Clips.ContainsKey(path))
       return Clips[path];
@@ -73,7 +73,7 @@ public class Loader
       return Clips[path];
     if (!File.Exists(path))
     {
-      Log.Warning("Can't find audio clip at " + path);
+      Log.Warning($"{fileName}: Can't find audio clip at {path}");
       return null;
     }
     var uri = "file:///" + path.Replace("\\", "/");

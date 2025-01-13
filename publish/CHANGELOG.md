@@ -1,3 +1,6 @@
+- v1.5
+  - Improves the config loading to show the actual file and row numbers when an error occurs.
+
 - v1.4
   - Fixed for the new game version.
   - Fixes warning about "empty" clip not found.
