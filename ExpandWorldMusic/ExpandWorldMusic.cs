@@ -4,12 +4,12 @@ using HarmonyLib;
 using Service;
 namespace ExpandWorld.Music;
 [BepInPlugin(GUID, NAME, VERSION)]
-[BepInDependency("expand_world_data", "1.50")]
+[BepInDependency("expand_world_data", "1.52")]
 public class EWM : BaseUnityPlugin
 {
   public const string GUID = "expand_world_music";
   public const string NAME = "Expand World Music";
-  public const string VERSION = "1.5";
+  public const string VERSION = "1.6";
   public static ServerSync.ConfigSync ConfigSync = new(GUID)
   {
     DisplayName = NAME,
