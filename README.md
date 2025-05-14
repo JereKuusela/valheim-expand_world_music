@@ -4,7 +4,7 @@ Allows changing event and environment musics.
 
 Install on all clients and the server (modding [guide](https://youtu.be/L9ljm2eKLrk)).
 
-Install [Expand World Data](https://valheim.thunderstore.io/package/JereKuusela/Expand_World_Data/).
+Can also be used to customize your own music by only installing on the client.
 
 ## Configuration
 
@@ -15,10 +15,13 @@ Command `ew_musics` can be used list all available clips.
 ### expand_music.yaml
 
 - name: Identifier of the music.
+  - This is what the game uses to find the music.
+  - Adding new identifiers doesn't automatically do anything.
+  - You need some other mod like Expand World Data to change used music in the `expand_biomes.yaml` file.
 - clips: List of music files.
-  - The file is relative to `config/expand_world/` folder.
+  - The file path is relative to `config/expand_world/` folder.
+  - You can use `../` to go up one folder.
   - Remember to include the file extension.
-  - Adding for example "../music/" to the beginning of the file path can be used to change the folder.
   - Original music names can also be used.
   - If multiple files are given, the game randomly chooses one of them.
   - Note: The music files are not synced to clients. They must be provided in the mod pack.
@@ -28,6 +31,46 @@ Command `ew_musics` can be used list all available clips.
 - ambientMusic: If true, loop is set from the game settings.
 - loop: If true, the same file is played again when the music ends. If false, then a new file is randomly selected.
 - resume: If true and loop is true, the music continues from the last position.
+
+### Example
+
+Adding a new music clips:
+
+```yaml
+- name: "meadowsDay"
+  clips:
+  # This is in config/music/ folder.
+    - "../music/epicSong.ogg"
+  # This is in config/expand_world/music folder.
+    - "music/epicSong2.ogg"
+  volume: 0.5
+  fadeInTime: 5
+  alwaysFadeOut: true
+  ambientMusic: false
+  loop: true
+  resume: false
+- name: "meadowsNight"
+  clips:
+  # This is in config/expand_world folder.
+    - "otherSong.ogg"
+  # This is in music folder.
+    - "../../music/some_music.ogg"
+  volume: 0.5
+  fadeInTime: 5
+  alwaysFadeOut: true
+  ambientMusic: false
+  loop: true
+  resume: false
+```
+
+Using the new music in `expand_biomes.yaml`:
+
+```yaml
+- biome: Meadows
+  musicDay: meadowsDay
+  musicNight: meadowsNight
+  # Other fields...
+```
 
 ## Credits
 

@@ -1,3 +1,7 @@
+- 1.7
+  - Removes dependency of Expand World Data mod.
+  - Removes version enforcement (can be now purely used client side)
+
 - 1.6
   - Fixed for the new update.
 

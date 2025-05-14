@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ExpandWorldData;
 using HarmonyLib;
 using Service;
 namespace ExpandWorld.Music;
@@ -10,7 +9,7 @@ namespace ExpandWorld.Music;
 public class Manager
 {
   public static string FileName = "expand_music.yaml";
-  public static string FilePath = Path.Combine(Yaml.Directory, FileName);
+  public static string FilePath = Path.Combine(EWM.YamlDirectory, FileName);
   public static string Pattern = "expand_music*.yaml";
   public static List<MusicMan.NamedMusic> Originals = [];
 
@@ -20,15 +19,14 @@ public class Manager
   {
     if (!IsServer()) return;
     if (File.Exists(FilePath)) return;
-    var yaml = Yaml.Serializer().Serialize(MusicMan.instance.m_music.Select(Loader.ToData).ToList());
+    var yaml = Yaml.Write(MusicMan.instance.m_music.Select(Loader.ToData).ToList());
     File.WriteAllText(FilePath, yaml);
   }
-  public static void FromFile()
+  public static void FromFile(string lines)
   {
     if (!IsServer()) return;
-    var yaml = DataManager.Read<Data, MusicMan.NamedMusic>(Pattern, Loader.FromData);
-    Set(yaml);
-    Configuration.valueMusicData.Value = yaml;
+    EWM.valueMusicData.Value = lines;
+    Set(lines);
   }
   public static void FromSetting(string yaml)
   {
@@ -41,13 +39,13 @@ public class Manager
     if (yaml == "") return;
     try
     {
-      var data = Yaml.Deserialize<Data>(yaml, "Music").Select(d => Loader.FromData(d, "Music")).ToList();
+      var data = Yaml.Read<Data>(yaml, "Music", Log.Error).Select(d => Loader.FromData(d, "Music")).ToList();
       if (data.Count == 0)
       {
         Log.Warning($"Failed to load any music data.");
         return;
       }
-      if (ExpandWorldData.Configuration.DataMigration && Helper.IsServer() && AddMissingEntries(data))
+      if (IsServer() && AddMissingEntries(data))
       {
         // Watcher triggers reload.
         return;
@@ -76,7 +74,7 @@ public class Manager
     foreach (var item in missing)
       Log.Warning(item.m_name);
     var yaml = File.ReadAllText(FilePath);
-    var data = Yaml.Serializer().Serialize(missing.Select(Loader.ToData));
+    var data = Yaml.Write(missing.Select(Loader.ToData).ToList());
     // Directly appending is risky but necessary to keep comments, etc.
     yaml += "\n" + data;
     File.WriteAllText(FilePath, yaml);
@@ -95,7 +93,7 @@ public class Manager
   }
   public static void SetupWatcher()
   {
-    Yaml.SetupWatcher(Pattern, FromFile);
+    Watcher.Setup(EWM.YamlDirectory, EWM.BackupDirectory, Pattern, FromFile);
   }
 }
 
@@ -107,6 +105,6 @@ public class InitializeContent
   {
     Loader.InitializeDefaultClips();
     Manager.ToFile();
-    Manager.FromFile();
+    Manager.FromFile(Watcher.ReadFiles(EWM.YamlDirectory, Manager.Pattern));
   }
 }

@@ -4,7 +4,7 @@ Allows changing event and environment musics.
 
 Install on all clients and the server (modding [guide](https://youtu.be/L9ljm2eKLrk)).
 
-Install [Expand World Data](https://valheim.thunderstore.io/package/JereKuusela/Expand_World_Data/).
+Can also be used to customize your own music by only installing on the client.
 
 ## Usage
 

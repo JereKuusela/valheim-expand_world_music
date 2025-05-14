@@ -68,7 +68,7 @@ public class Loader
     if (Clips.ContainsKey(path))
       return Clips[path];
     if (!File.Exists(path))
-      path = Path.Combine(Yaml.Directory, path);
+      path = Path.Combine(EWM.YamlDirectory, path);
     if (Clips.ContainsKey(path))
       return Clips[path];
     if (!File.Exists(path))

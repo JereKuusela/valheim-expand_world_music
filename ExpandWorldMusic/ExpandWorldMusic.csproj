@@ -2,12 +2,13 @@
   <PropertyGroup>
     <TargetFramework>net4.8</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>preview</LangVersion>
-    <nullable>enable</nullable>
-    <DoILRepack>false</DoILRepack>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
-  <Target Name="CopyDLL" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="$(ProjectDir)\..\..\Libs" />
+  <Target Name="CopyDLL" AfterTargets="ILRepacker">
+    <Copy
+      SourceFiles="$(TargetDir)$(ProjectName).dll"
+      DestinationFolder="$(ProjectDir)\..\..\Libs" />
     <Message Text="Copied to Libs folder." Importance="High" />
   </Target>
   <ItemGroup>
@@ -44,11 +45,14 @@
     <Reference Include="assembly_guiutils">
       <HintPath>..\..\Libs\assembly_guiutils.dll</HintPath>
     </Reference>
-    <Reference Include="ExpandWorldData">
-      <HintPath>..\..\Libs\ExpandWorldData.dll</HintPath>
+    <Reference Include="ServerSync">
+      <HintPath>..\..\Libs\ServerSync.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet">
       <HintPath>..\..\Libs\YamlDotNet.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2" />
   </ItemGroup>
 </Project>
