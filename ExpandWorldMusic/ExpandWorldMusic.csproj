@@ -30,6 +30,9 @@
     <Reference Include="UnityEngine.UnityWebRequestAudioModule">
       <HintPath>..\..\Libs\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
     </Reference>
+    <Reference Include="SoftReferenceableAssets">
+      <HintPath>..\..\Libs\SoftReferenceableAssets.dll</HintPath>
+    </Reference>
     <Reference Include="0Harmony">
       <HintPath>..\..\Libs\0Harmony.dll</HintPath>
     </Reference>
