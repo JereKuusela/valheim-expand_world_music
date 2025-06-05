@@ -11,7 +11,7 @@ public class EWM : BaseUnityPlugin
 {
   public const string GUID = "expand_world_music";
   public const string NAME = "Expand World Music";
-  public const string VERSION = "1.7.1";
+  public const string VERSION = "1.8";
   public static string YamlDirectory = Path.Combine(Paths.ConfigPath, "expand_world");
   public static string BackupDirectory = Path.Combine(Paths.ConfigPath, "expand_world_backups");
 

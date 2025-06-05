@@ -1,3 +1,6 @@
+- 1.8
+  - Adds support for location music.
+
 - 1.7
   - Removes dependency of Expand World Data mod.
   - Removes version enforcement (can be now purely used client side)

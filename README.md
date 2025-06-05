@@ -8,7 +8,7 @@ Can also be used to customize your own music by only installing on the client.
 
 ## Configuration
 
-The file `expand_world/expand_music.yaml` is created when loading a world.
+The files `expand_world/expand_music.yaml` and `expand_world/expand_location_music.yaml` are created when loading a world.
 
 Command `ew_musics` can be used list all available clips.
 
@@ -31,6 +31,18 @@ Command `ew_musics` can be used list all available clips.
 - ambientMusic: If true, loop is set from the game settings.
 - loop: If true, the same file is played again when the music ends. If false, then a new file is randomly selected.
 - resume: If true and loop is true, the music continues from the last position.
+
+### expand_location_music.yaml
+
+- name: Identifier of the location.
+- clips: List of music files.
+- volume: Volume of the music.
+- loop: If true, the music restarts automatically when it ends.
+- oneTime: If true, the music is played only once per location.
+- notIfEnemies: If true, the music is not played if there are enemies nearby.
+- forceFade: If true, the volume is lowered when the music is near ending.
+- radius: Radius of the music area in meters.
+- radiusFromLocation: If true, radius of the location is added to the music radius.
 
 ### Example
 
