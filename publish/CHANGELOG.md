@@ -1,3 +1,7 @@
+- 1.9
+  - Fixes the same location having multiple location entries causing multiple location music entries. Now only the first entry is used.
+  - Fixes multiple same location music entries causing an error. Now only the first entry is used.
+
 - 1.8
   - Adds support for location music.
 
@@ -10,13 +14,3 @@
 
 - v1.5
   - Improves the config loading to show the actual file and row numbers when an error occurs.
-
-- v1.4
-  - Fixed for the new game version.
-  - Fixes warning about "empty" clip not found.
-
-- v1.3
-  - Updated for the new Expand World Data features.
-
-- v1.2
-  - Fixes default values incorrectly being true instead of false (config was read wrong).

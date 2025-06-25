@@ -19,7 +19,11 @@ public class LocationManager
   {
     if (!IsServer()) return;
     if (File.Exists(FilePath)) return;
-    var yaml = Yaml.Write(ZoneSystem.instance.m_locations.Select(LocationLoader.ToData).Where(m => m != null).Select(m => m!).ToList());
+    var yaml = Yaml.Write(ZoneSystem.instance.m_locations
+      .Select(LocationLoader.ToData)
+      .Where(m => m != null).Select(m => m!)
+      .Distinct(new LocationDataComparer())
+      .ToList());
     File.WriteAllText(FilePath, yaml);
   }
   public static void FromFile(string lines)
@@ -44,7 +48,7 @@ public class LocationManager
         return;
       }
       Log.Info($"Reloading location music data ({data.Count} entries).");
-      Data = data.ToDictionary(d => d.name);
+      Data = data.Distinct(new LocationDataComparer()).ToDictionary(d => d.name);
     }
     catch (Exception e)
     {

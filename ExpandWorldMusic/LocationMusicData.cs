@@ -12,3 +12,15 @@ public class LocationData
   public bool notIfEnemies = true;
   public bool forceFade = false;
 }
+
+// Comparer for LocationData
+public class LocationDataComparer : System.Collections.Generic.IEqualityComparer<LocationData>
+{
+  public bool Equals(LocationData? x, LocationData? y) => x?.name == y?.name;
+
+  public int GetHashCode(LocationData obj)
+  {
+    if (obj is null) return 0;
+    return obj.name?.GetHashCode() ?? 0;
+  }
+}
