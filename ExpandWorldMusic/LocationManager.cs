@@ -10,7 +10,6 @@ namespace ExpandWorld.Music;
 public class LocationManager
 {
   public static string FileName = "expand_location_music.yaml";
-  public static string FilePath = Path.Combine(EWM.YamlDirectory, FileName);
   public static string Pattern = "expand_location_music*.yaml";
   public static Dictionary<string, LocationData> Data = [];
 
@@ -18,13 +17,13 @@ public class LocationManager
   public static void ToFile()
   {
     if (!IsServer()) return;
-    if (File.Exists(FilePath)) return;
+    if (Yaml.Exists(FileName)) return;
     var yaml = Yaml.Write(ZoneSystem.instance.m_locations
       .Select(LocationLoader.ToData)
       .Where(m => m != null).Select(m => m!)
       .Distinct(new LocationDataComparer())
       .ToList());
-    File.WriteAllText(FilePath, yaml);
+    Yaml.WriteFile(FileName, yaml);
   }
   public static void FromFile(string lines)
   {
@@ -58,7 +57,7 @@ public class LocationManager
   }
   public static void SetupWatcher()
   {
-    Watcher.Setup(EWM.YamlDirectory, EWM.BackupDirectory, Pattern, FromFile);
+    Yaml.Setup(Pattern, FromFile);
   }
 }
 
@@ -69,7 +68,7 @@ public class InitializeLocationContent
   static void Postfix()
   {
     LocationManager.ToFile();
-    LocationManager.FromFile(Watcher.ReadFiles(EWM.YamlDirectory, LocationManager.Pattern));
+    LocationManager.FromFile(Yaml.ReadFiles(LocationManager.Pattern));
   }
 }
 

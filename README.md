@@ -10,7 +10,7 @@ Can also be used to customize your own music by only installing on the client.
 
 The files `expand_world/expand_music.yaml` and `expand_world/expand_location_music.yaml` are created when loading a world.
 
-Command `ew_musics` can be used list all available clips.
+Command `ew_musics` can be used list all available clips to the log file.
 
 ### expand_music.yaml
 

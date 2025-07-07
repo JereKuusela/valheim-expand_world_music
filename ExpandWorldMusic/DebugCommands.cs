@@ -11,6 +11,7 @@ public class SetCommands
     new Terminal.ConsoleCommand("ew_musics", "- Prints available music clips.", args =>
     {
       ZLog.Log(string.Join("\n", Loader.Clips.Keys.OrderBy(k => k)));
+      args.Context.AddString("Available music clips printed to the log file.");
     }, true);
   }
 }
