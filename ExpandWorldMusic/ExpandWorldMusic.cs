@@ -11,7 +11,7 @@ public class EWM : BaseUnityPlugin
 {
   public const string GUID = "expand_world_music";
   public const string NAME = "Expand World Music";
-  public const string VERSION = "1.10";
+  public const string VERSION = "1.11";
 
 #nullable disable
   public static CustomSyncedValue<string> valueMusicData;

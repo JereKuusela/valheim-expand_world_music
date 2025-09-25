@@ -39,6 +39,7 @@ Command `ew_musics` can be used list all available clips to the log file.
 - volume: Volume of the music.
 - loop: If true, the music restarts automatically when it ends.
 - oneTime: If true, the music is played only once per location.
+  - Note: Setting this to true causes errors for some locations.
 - notIfEnemies: If true, the music is not played if there are enemies nearby.
 - forceFade: If true, the volume is lowered when the music is near ending.
 - radius: Radius of the music area in meters.
