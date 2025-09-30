@@ -28,40 +28,36 @@ public class LocationManager
   public static void FromFile(string lines)
   {
     if (!IsServer()) return;
-    EWM.valueLocationMusicData.Value = lines;
-    Set(lines);
-  }
-  public static void FromSetting(string yaml)
-  {
-    if (!IsServer()) Set(yaml);
-  }
-  private static void Set(string yaml)
-  {
-    if (yaml == "") return;
+    if (lines == "")
+    {
+      EWM.valueLocationMusicData.Value = [];
+      return;
+    }
     try
     {
-      var data = Yaml.Read<LocationData>(yaml, "LocationMusic", Log.Error).ToList();
-      if (data.Count == 0)
-      {
-        Log.Warning($"Failed to load any music data.");
-        return;
-      }
-      Log.Info($"Reloading location music data ({data.Count} entries).");
-      Data.Clear();
-      foreach (var d in data)
-      {
-        if (Data.ContainsKey(d.name))
-        {
-          Log.Warning($"Duplicate location music entry for '{d.name}' found.");
-          continue;
-        }
-        Data[d.name] = d;
-      }
+      var data = Yaml.Read<LocationData>(lines, "LocationMusic", Log.Error).ToList();
+      EWM.valueLocationMusicData.Value = data;
     }
     catch (Exception e)
     {
       Log.Error(e.Message);
       Log.Error(e.StackTrace);
+      EWM.valueLocationMusicData.Value = [];
+    }
+  }
+  public static void FromSetting(List<LocationData> data)
+  {
+    Log.Info($"Reloading location music data ({data.Count} entries).");
+    Data.Clear();
+    foreach (var d in data)
+    {
+      if (Data.ContainsKey(d.name))
+      {
+        if (IsServer())
+          Log.Warning($"Duplicate location music entry for '{d.name}' found.");
+        continue;
+      }
+      Data[d.name] = d;
     }
   }
   public static void SetupWatcher()
@@ -106,10 +102,10 @@ public class MusicLocatioAwake
     audioSource.enabled = audioSource.clip != null;
   }
 
-  private static string RandomizeClip(string[] clips)
+  private static string RandomizeClip(List<string> clips)
   {
-    if (clips.Length == 0) return "";
-    if (clips.Length == 1) return clips[0];
-    return clips[UnityEngine.Random.Range(0, clips.Length)];
+    if (clips.Count == 0) return "";
+    if (clips.Count == 1) return clips[0];
+    return clips[UnityEngine.Random.Range(0, clips.Count)];
   }
 }

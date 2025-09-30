@@ -5,7 +5,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <Target Name="CopyDLL" AfterTargets="ILRepacker">
+  <Target Name="CopyDLL" AfterTargets="Build">
     <Copy
       SourceFiles="$(TargetDir)$(ProjectName).dll"
       DestinationFolder="$(ProjectDir)\..\..\Libs" />
@@ -30,6 +30,12 @@
     <Reference Include="UnityEngine.UnityWebRequestAudioModule">
       <HintPath>..\..\Libs\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\Libs\UnityEngine.UI.dll</HintPath>
+    </Reference>
     <Reference Include="SoftReferenceableAssets">
       <HintPath>..\..\Libs\SoftReferenceableAssets.dll</HintPath>
     </Reference>
@@ -48,14 +54,8 @@
     <Reference Include="assembly_guiutils">
       <HintPath>..\..\Libs\assembly_guiutils.dll</HintPath>
     </Reference>
-    <Reference Include="ServerSync">
-      <HintPath>..\..\Libs\ServerSync.dll</HintPath>
-    </Reference>
     <Reference Include="YamlDotNet">
       <HintPath>..\..\Libs\YamlDotNet.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2" />
   </ItemGroup>
 </Project>

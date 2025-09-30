@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using HarmonyLib;
 using Service;
 using UnityEngine;
 namespace ExpandWorld.Music;
 
-public class ObjectManager
+public class SoundManager
 {
-  public static string FileName = "expand_object_music.yaml";
-  public static string Pattern = "expand_object_music*.yaml";
+  public static string FileName = "expand_sounds.yaml";
+  public static string Pattern = "expand_sounds*.yaml";
   private readonly static HashSet<string> DataKeys = [];
 
   public static bool IsServer() => ZNet.instance && ZNet.instance.IsServer();
@@ -33,19 +32,17 @@ public class ObjectManager
     }
   }
 
-  private static ObjectData? ToData(ZSFX zsfx)
+  private static SoundData? ToData(ZSFX zsfx)
   {
     if (zsfx == null) return null;
 
-    return new ObjectData
+    return new SoundData
     {
-      name = Utils.GetPrefabName(zsfx.gameObject.name),
+      name = zsfx.name,
       playOnAwake = zsfx.m_playOnAwake,
       closedCaptionToken = zsfx.m_closedCaptionToken,
-      secondaryCaptionToken = zsfx.m_secondaryCaptionToken,
-      captionType = (int)zsfx.m_captionType,
       minimumCaptionVolume = zsfx.m_minimumCaptionVolume,
-      audioClips = zsfx.m_audioClips?.Select(clip => clip?.name ?? "").Where(name => !string.IsNullOrEmpty(name)).ToArray() ?? [],
+      clips = zsfx.m_audioClips.Select(clip => clip?.name ?? "").Where(name => !string.IsNullOrEmpty(name)).ToList(),
       maxConcurrentSources = zsfx.m_maxConcurrentSources,
       ignoreConcurrencyDistance = zsfx.m_ignoreConcurrencyDistance,
       maxPitch = zsfx.m_maxPitch,
@@ -70,50 +67,46 @@ public class ObjectManager
   public static void FromFile(string lines)
   {
     if (!IsServer()) return;
-    EWM.valueObjectMusicData.Value = lines;
-    Set(lines);
-  }
-
-  public static void FromSetting(string yaml)
-  {
-    if (!IsServer()) Set(yaml);
-  }
-
-  private static void Set(string yaml)
-  {
-    if (yaml == "") return;
+    if (lines == "")
+    {
+      EWM.valueSoundData.Value = [];
+      return;
+    }
     try
     {
-      var data = Yaml.Read<ObjectData>(yaml, "ObjectMusic", Log.Error).ToList();
-      if (data.Count == 0)
-      {
-        Log.Warning($"Failed to load any Object music data.");
-        return;
-      }
-      Log.Info($"Reloading Object music data ({data.Count} entries).");
-      DataKeys.Clear();
-      var zs = ZNetScene.instance;
-      foreach (var d in data)
-      {
-        if (DataKeys.Contains(d.name))
-        {
-          Log.Warning($"Duplicate object music entry for '{d.name}' found.");
-          continue;
-        }
-        DataKeys.Add(d.name);
-        var prefab = zs.GetPrefab(d.name);
-        if (prefab == null)
-        {
-          Log.Warning($"No prefab found for '{d.name}'.");
-          continue;
-        }
-        UpdatePrefab(prefab, d);
-      }
+      var data = Yaml.Read<SoundData>(lines, "Sounds", Log.Error).ToList();
+      EWM.valueSoundData.Value = data;
     }
     catch (Exception e)
     {
       Log.Error(e.Message);
       Log.Error(e.StackTrace);
+      EWM.valueSoundData.Value = [];
+    }
+  }
+
+  public static void FromSetting(List<SoundData> data)
+  {
+    Log.Info($"Reloading sound data ({data.Count} entries).");
+    DataKeys.Clear();
+    var zs = ZNetScene.instance;
+    foreach (var d in data)
+    {
+      if (DataKeys.Contains(d.name))
+      {
+        if (IsServer())
+          Log.Warning($"Duplicate sound entry for '{d.name}' found.");
+        continue;
+      }
+      DataKeys.Add(d.name);
+      var prefab = zs.GetPrefab(d.name);
+      if (prefab == null)
+      {
+        if (IsServer())
+          Log.Warning($"No prefab found for '{d.name}'.");
+        continue;
+      }
+      UpdatePrefab(prefab, d);
     }
   }
 
@@ -122,14 +115,12 @@ public class ObjectManager
     Yaml.Setup(Pattern, FromFile);
   }
 
-  static void UpdatePrefab(GameObject go, ObjectData data)
+  static void UpdatePrefab(GameObject go, SoundData data)
   {
     var zsfx = go.GetComponent<ZSFX>();
     if (!zsfx) return;
     zsfx.m_playOnAwake = data.playOnAwake;
     zsfx.m_closedCaptionToken = data.closedCaptionToken;
-    zsfx.m_secondaryCaptionToken = data.secondaryCaptionToken;
-    zsfx.m_captionType = (ClosedCaptions.CaptionType)data.captionType;
     zsfx.m_minimumCaptionVolume = data.minimumCaptionVolume;
     zsfx.m_maxConcurrentSources = data.maxConcurrentSources;
     zsfx.m_ignoreConcurrencyDistance = data.ignoreConcurrencyDistance;
@@ -149,7 +140,7 @@ public class ObjectManager
     zsfx.m_distanceReverb = data.distanceReverb;
     zsfx.m_useCustomReverbDistance = data.useCustomReverbDistance;
     zsfx.m_customReverbDistance = data.customReverbDistance;
-    zsfx.m_audioClips = data.audioClips.Select(name => Loader.Clips.ContainsKey(name) ? Loader.Clips[name] : null).Where(clip => clip != null).ToArray();
+    zsfx.m_audioClips = data.clips.Select(name => Loader.Clips.ContainsKey(name) ? Loader.Clips[name] : null).Where(clip => clip != null).ToArray();
   }
 }
 
@@ -158,7 +149,7 @@ public class InitializeObjectContent
 {
   static void Postfix()
   {
-    ObjectManager.ToFile();
-    ObjectManager.FromFile(Yaml.ReadFiles(ObjectManager.Pattern));
+    SoundManager.ToFile();
+    SoundManager.FromFile(Yaml.ReadFiles(SoundManager.Pattern));
   }
 }

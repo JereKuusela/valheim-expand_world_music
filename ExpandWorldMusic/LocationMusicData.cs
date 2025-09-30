@@ -1,9 +1,13 @@
+using System;
+using System.Collections.Generic;
+
 namespace ExpandWorld.Music;
 
+[Serializable]
 public class LocationData
 {
   public string name = "";
-  public string[] clips = [];
+  public List<string> clips = [];
   public float volume = 0f;
   public bool radiusFromLocation = false;
   public float radius = 10f;

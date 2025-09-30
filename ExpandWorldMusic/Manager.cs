@@ -24,43 +24,39 @@ public class Manager
   public static void FromFile(string lines)
   {
     if (!IsServer()) return;
-    EWM.valueMusicData.Value = lines;
-    Set(lines);
-  }
-  public static void FromSetting(string yaml)
-  {
-    if (!IsServer()) Set(yaml);
-  }
-  private static void Set(string yaml)
-  {
-    if (IsServer() && Originals.Count == 0)
-      Originals = [.. MusicMan.instance.m_music];
-    if (yaml == "") return;
+    if (lines == "")
+    {
+      EWM.valueMusicData.Value = [];
+      return;
+    }
     try
     {
-      var data = Yaml.Read<MusicData>(yaml, "Music", Log.Error).Select(d => Loader.FromData(d, "Music")).ToList();
-      if (data.Count == 0)
-      {
-        Log.Warning($"Failed to load any music data.");
-        return;
-      }
-      if (IsServer() && AddMissingEntries(data))
-      {
-        // Watcher triggers reload.
-        return;
-      }
-      Log.Info($"Reloading music data ({data.Count} entries).");
-      MusicMan.instance.m_music = data;
-      UpdateHashes();
-      var current = MusicMan.instance.m_currentMusic?.m_name ?? "";
-      MusicMan.instance.Reset();
-      MusicMan.instance.StartMusic(current);
+      var data = Yaml.Read<Data>(lines, "Music", Log.Error).ToList();
+      EWM.valueMusicData.Value = data;
     }
     catch (Exception e)
     {
       Log.Error(e.Message);
       Log.Error(e.StackTrace);
+      EWM.valueMusicData.Value = [];
     }
+  }
+  public static void FromSetting(List<Data> data)
+  {
+    if (IsServer() && Originals.Count == 0)
+      Originals = [.. MusicMan.instance.m_music];
+    var musicList = data.Select(d => Loader.FromData(d, "Music")).ToList();
+    if (IsServer() && AddMissingEntries(musicList))
+    {
+      // Watcher triggers reload.
+      return;
+    }
+    Log.Info($"Reloading music data ({musicList.Count} entries).");
+    MusicMan.instance.m_music = musicList;
+    UpdateHashes();
+    var current = MusicMan.instance.m_currentMusic?.m_name ?? "";
+    MusicMan.instance.Reset();
+    MusicMan.instance.StartMusic(current);
   }
   private static bool AddMissingEntries(List<MusicMan.NamedMusic> entries)
   {

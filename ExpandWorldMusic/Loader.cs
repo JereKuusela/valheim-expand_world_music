@@ -11,7 +11,7 @@ namespace ExpandWorld.Music;
 public class Loader
 {
   public static Dictionary<string, AudioClip> Clips = [];
-  public static MusicMan.NamedMusic FromData(MusicData data, string fileName)
+  public static MusicMan.NamedMusic FromData(Data data, string fileName)
   {
     return new()
     {
@@ -26,13 +26,13 @@ public class Loader
       m_volume = data.volume
     };
   }
-  public static MusicData ToData(MusicMan.NamedMusic music)
+  public static Data ToData(MusicMan.NamedMusic music)
   {
     return new()
     {
       alwaysFadeOut = music.m_alwaysFadeout,
       ambientMusic = music.m_ambientMusic,
-      clips = music.m_clips.Where(c => c?.name != null).Select(c => c.name).ToArray(),
+      clips = [.. music.m_clips.Where(c => c?.name != null).Select(c => c.name)],
       fadeInTime = music.m_fadeInTime,
       loop = music.m_loop,
       name = music.m_name,
