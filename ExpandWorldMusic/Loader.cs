@@ -11,13 +11,13 @@ namespace ExpandWorld.Music;
 public class Loader
 {
   public static Dictionary<string, AudioClip> Clips = [];
-  public static MusicMan.NamedMusic FromData(Data data, string fileName)
+  public static MusicMan.NamedMusic FromData(MusicData data, string fileName)
   {
     return new()
     {
       m_alwaysFadeout = data.alwaysFadeOut,
       m_ambientMusic = data.ambientMusic,
-      m_clips = data.clips.Select(d => PreloadClipCoroutine(d, fileName)).Where(c => c != null).Cast<AudioClip>().ToArray(),
+      m_clips = [.. data.clips.Select(d => PreloadClipCoroutine(d, fileName)).Where(c => c != null).Cast<AudioClip>()],
       m_enabled = true,
       m_fadeInTime = data.fadeInTime,
       m_loop = data.loop,
@@ -26,7 +26,7 @@ public class Loader
       m_volume = data.volume
     };
   }
-  public static Data ToData(MusicMan.NamedMusic music)
+  public static MusicData ToData(MusicMan.NamedMusic music)
   {
     return new()
     {

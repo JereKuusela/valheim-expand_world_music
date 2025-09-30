@@ -11,11 +11,12 @@ public class EWM : BaseUnityPlugin
 {
   public const string GUID = "expand_world_music";
   public const string NAME = "Expand World Music";
-  public const string VERSION = "1.11";
+  public const string VERSION = "1.12";
 
 #nullable disable
-  public static CustomSyncedValue<string> valueMusicData;
-  public static CustomSyncedValue<string> valueLocationMusicData;
+  public static CustomSyncedValue<Data[]> valueMusicData;
+  public static CustomSyncedValue<LocationData[]> valueLocationMusicData;
+  public static CustomSyncedValue<ObjectData[]> valueObjectMusicData;
 #nullable enable
   public static ConfigSync ConfigSync = new(GUID)
   {
@@ -32,10 +33,13 @@ public class EWM : BaseUnityPlugin
     valueMusicData.ValueChanged += () => Manager.FromSetting(valueMusicData.Value);
     valueLocationMusicData = new(ConfigSync, "location_music_data");
     valueLocationMusicData.ValueChanged += () => LocationManager.FromSetting(valueLocationMusicData.Value);
+    valueObjectMusicData = new(ConfigSync, "object_music_data");
+    valueObjectMusicData.ValueChanged += () => ObjectManager.FromSetting(valueObjectMusicData.Value);
     try
     {
       Manager.SetupWatcher();
       LocationManager.SetupWatcher();
+      ObjectManager.SetupWatcher();
     }
     catch (Exception e)
     {

@@ -47,7 +47,16 @@ public class LocationManager
         return;
       }
       Log.Info($"Reloading location music data ({data.Count} entries).");
-      Data = data.Distinct(new LocationDataComparer()).ToDictionary(d => d.name);
+      Data.Clear();
+      foreach (var d in data)
+      {
+        if (Data.ContainsKey(d.name))
+        {
+          Log.Warning($"Duplicate location music entry for '{d.name}' found.");
+          continue;
+        }
+        Data[d.name] = d;
+      }
     }
     catch (Exception e)
     {
@@ -92,13 +101,9 @@ public class MusicLocatioAwake
     audioSource.loop = data.loop;
     var clipName = RandomizeClip(data.clips);
     var clip = Loader.Clips.ContainsKey(clipName) ? Loader.Clips[clipName] : null;
-    if (clip == null)
-      audioSource.enabled = false;
-    else
-    {
-      audioSource.enabled = true;
+    if (clip != null)
       audioSource.clip = clip;
-    }
+    audioSource.enabled = audioSource.clip != null;
   }
 
   private static string RandomizeClip(string[] clips)

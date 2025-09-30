@@ -38,7 +38,7 @@ public class Manager
     if (yaml == "") return;
     try
     {
-      var data = Yaml.Read<Data>(yaml, "Music", Log.Error).Select(d => Loader.FromData(d, "Music")).ToList();
+      var data = Yaml.Read<MusicData>(yaml, "Music", Log.Error).Select(d => Loader.FromData(d, "Music")).ToList();
       if (data.Count == 0)
       {
         Log.Warning($"Failed to load any music data.");
