@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using HarmonyLib;
 using Service;
 namespace ExpandWorld.Music;
 
-public class Manager
+public class MusicManager
 {
   public static string FileName = "expand_music.yaml";
   public static string Pattern = "expand_music*.yaml";
@@ -18,7 +17,7 @@ public class Manager
   {
     if (!IsServer()) return;
     if (Yaml.Exists(FileName)) return;
-    var yaml = Yaml.Write(MusicMan.instance.m_music.Select(Loader.ToData).ToList());
+    var yaml = Yaml.Write(MusicMan.instance.m_music.Select(MusicLoader.ToData).ToList());
     Yaml.WriteFile(FileName, yaml);
   }
   public static void FromFile(string lines)
@@ -45,7 +44,7 @@ public class Manager
   {
     if (IsServer() && Originals.Count == 0)
       Originals = [.. MusicMan.instance.m_music];
-    var musicList = data.Select(d => Loader.FromData(d, "Music")).ToList();
+    var musicList = data.Select(d => MusicLoader.FromData(d, "Music")).ToList();
     if (IsServer() && AddMissingEntries(musicList))
     {
       // Watcher triggers reload.
@@ -69,7 +68,7 @@ public class Manager
     foreach (var item in missing)
       Log.Warning(item.m_name);
     var yaml = Yaml.ReadFile(FileName);
-    var data = Yaml.Write(missing.Select(Loader.ToData).ToList());
+    var data = Yaml.Write(missing.Select(MusicLoader.ToData).ToList());
     // Directly appending is risky but necessary to keep comments, etc.
     yaml += "\n" + data;
     Yaml.WriteFile(FileName, yaml);
@@ -98,8 +97,7 @@ public class InitializeContent
 {
   static void Postfix()
   {
-    Loader.InitializeDefaultClips();
-    Manager.ToFile();
-    Manager.FromFile(Yaml.ReadFiles(Manager.Pattern));
+    MusicManager.ToFile();
+    MusicManager.FromFile(Yaml.ReadFiles(MusicManager.Pattern));
   }
 }

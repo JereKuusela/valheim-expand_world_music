@@ -23,7 +23,7 @@ public class LocationLoader
     }
     LocationData data = new()
     {
-      clips = [audioSource.clip?.name ?? ""],
+      clips = Clips.GetNames(audioSource.clip),
       name = location.m_prefab.Asset.name,
       volume = audioSource.volume,
       forceFade = locationMusic.m_forceFade,

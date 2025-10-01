@@ -42,7 +42,7 @@ public class SoundManager
       playOnAwake = zsfx.m_playOnAwake,
       closedCaptionToken = zsfx.m_closedCaptionToken,
       minimumCaptionVolume = zsfx.m_minimumCaptionVolume,
-      clips = zsfx.m_audioClips.Select(clip => clip?.name ?? "").Where(name => !string.IsNullOrEmpty(name)).ToList(),
+      clips = Clips.GetNames(zsfx.m_audioClips),
       maxConcurrentSources = zsfx.m_maxConcurrentSources,
       ignoreConcurrencyDistance = zsfx.m_ignoreConcurrencyDistance,
       maxPitch = zsfx.m_maxPitch,
@@ -140,7 +140,7 @@ public class SoundManager
     zsfx.m_distanceReverb = data.distanceReverb;
     zsfx.m_useCustomReverbDistance = data.useCustomReverbDistance;
     zsfx.m_customReverbDistance = data.customReverbDistance;
-    zsfx.m_audioClips = data.clips.Select(name => Loader.Clips.ContainsKey(name) ? Loader.Clips[name] : null).Where(clip => clip != null).ToArray();
+    zsfx.m_audioClips = Clips.GetClips(data.clips);
   }
 }
 

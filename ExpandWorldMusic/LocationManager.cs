@@ -95,17 +95,10 @@ public class MusicLocatioAwake
     if (!audioSource) return;
     audioSource.volume = data.volume;
     audioSource.loop = data.loop;
-    var clipName = RandomizeClip(data.clips);
-    var clip = Loader.Clips.ContainsKey(clipName) ? Loader.Clips[clipName] : null;
+    var clip = Clips.GetRandomClip(data.clips);
     if (clip != null)
       audioSource.clip = clip;
     audioSource.enabled = audioSource.clip != null;
   }
 
-  private static string RandomizeClip(List<string> clips)
-  {
-    if (clips.Count == 0) return "";
-    if (clips.Count == 1) return clips[0];
-    return clips[UnityEngine.Random.Range(0, clips.Count)];
-  }
 }
