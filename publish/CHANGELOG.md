@@ -1,6 +1,8 @@
 - 1.12
   - Adds support for modifying sound effects.
   - Adds support for adding new sound effects.
+  - Changes location music entries to be modification (if missing, nothing is changed).
+  - Fixes custom musics not working as location music.
 
 - 1.11
   - Fixes error near some locations. This was caused by incorrect default value for field `oneTime`.
@@ -15,7 +17,3 @@
 
 - 1.8
   - Adds support for location music.
-
-- 1.7
-  - Removes dependency of Expand World Data mod.
-  - Removes version enforcement (can be now purely used client side)
