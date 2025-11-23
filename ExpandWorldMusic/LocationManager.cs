@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using HarmonyLib;
 using Service;
@@ -9,6 +8,7 @@ namespace ExpandWorld.Music;
 
 public class LocationManager
 {
+  public static string ReferenceFileName = "ref_expand_location_music.yaml";
   public static string FileName = "expand_location_music.yaml";
   public static string Pattern = "expand_location_music*.yaml";
   public static Dictionary<string, LocationData> Data = [];
@@ -17,13 +17,15 @@ public class LocationManager
   public static void ToFile()
   {
     if (!IsServer()) return;
-    if (Yaml.Exists(FileName)) return;
+    if (!Yaml.Exists(FileName))
+      Yaml.WriteFile(FileName, "");
+    if (Yaml.Exists(ReferenceFileName)) return;
     var yaml = Yaml.Write(ZoneSystem.instance.m_locations
       .Select(LocationLoader.ToData)
       .Where(m => m != null).Select(m => m!)
       .Distinct(new LocationDataComparer())
       .ToList());
-    Yaml.WriteFile(FileName, yaml);
+    Yaml.WriteFile(ReferenceFileName, yaml);
   }
   public static void FromFile(string lines)
   {

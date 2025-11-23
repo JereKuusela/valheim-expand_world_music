@@ -8,6 +8,10 @@ namespace ExpandWorld.Music;
 public class SoundData
 {
   public string name = "";
+  public bool persistent = false;
+  [DefaultValue(true)]
+  public bool triggerTimeout = true;
+  public float timeout = 0f;
   [DefaultValue(true)]
   public bool playOnAwake = true;
   [DefaultValue("")]

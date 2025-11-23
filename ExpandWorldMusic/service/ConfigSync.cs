@@ -1044,7 +1044,6 @@ public class ConfigSync
       FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
       foreach (FieldInfo field in fields)
       {
-        Log.Info($"Serializing field {field.Name} of type {field.FieldType} in struct {type}");
         package.Write(GetZPackageTypeString(field.FieldType));
         AddValueToZPackage(package, field.GetValue(value));
       }

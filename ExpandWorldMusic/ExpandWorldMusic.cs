@@ -4,6 +4,7 @@ using BepInEx;
 using HarmonyLib;
 using ServerSync;
 using Service;
+using UnityEngine;
 namespace ExpandWorld.Music;
 
 [BepInPlugin(GUID, NAME, VERSION)]
@@ -11,7 +12,7 @@ public class EWM : BaseUnityPlugin
 {
   public const string GUID = "expand_world_music";
   public const string NAME = "Expand World Music";
-  public const string VERSION = "1.11.2";
+  public const string VERSION = "1.12";
 
 #nullable disable
   public static CustomSyncedValue<List<Data>> valueMusicData;
@@ -24,8 +25,11 @@ public class EWM : BaseUnityPlugin
     CurrentVersion = VERSION,
     IsLocked = true
   };
+  public static GameObject ParentObj = new("ExpandWorldMusic");
   public void Awake()
   {
+    ParentObj.SetActive(false);
+    DontDestroyOnLoad(ParentObj);
     Log.Init(Logger);
     Harmony harmony = new(GUID);
     harmony.PatchAll();

@@ -1,3 +1,7 @@
+- 1.12
+  - Adds support for modifying sound effects.
+  - Adds support for adding new sound effects.
+
 - 1.11
   - Fixes error near some locations. This was caused by incorrect default value for field `oneTime`.
 

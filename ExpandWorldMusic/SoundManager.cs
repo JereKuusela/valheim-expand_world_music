@@ -8,6 +8,7 @@ namespace ExpandWorld.Music;
 
 public class SoundManager
 {
+  public static string ReferenceFileName = "ref_expand_sounds.yaml";
   public static string FileName = "expand_sounds.yaml";
   public static string Pattern = "expand_sounds*.yaml";
   private readonly static HashSet<string> DataKeys = [];
@@ -17,7 +18,9 @@ public class SoundManager
   public static void ToFile()
   {
     if (!IsServer()) return;
-    if (Yaml.Exists(FileName)) return;
+    if (!Yaml.Exists(FileName))
+      Yaml.WriteFile(FileName, "");
+    if (Yaml.Exists(ReferenceFileName)) return;
 
     var zsfxComponents = ZNetScene.instance.m_namedPrefabs.Values.Select(go => go.GetComponent<ZSFX>()).Where(zsfx => zsfx).ToList();
     var objectDataList = zsfxComponents
@@ -28,17 +31,20 @@ public class SoundManager
     if (objectDataList.Count > 0)
     {
       var yaml = Yaml.Write(objectDataList);
-      Yaml.WriteFile(FileName, yaml);
+      Yaml.WriteFile(ReferenceFileName, yaml);
     }
   }
 
   private static SoundData? ToData(ZSFX zsfx)
   {
     if (zsfx == null) return null;
-
+    var timed = zsfx.GetComponent<TimedDestruction>();
     return new SoundData
     {
       name = zsfx.name,
+      persistent = zsfx.GetComponent<ZNetView>()?.m_persistent ?? false,
+      triggerTimeout = timed?.m_triggerOnAwake ?? false,
+      timeout = timed?.m_timeout ?? 0f,
       playOnAwake = zsfx.m_playOnAwake,
       closedCaptionToken = zsfx.m_closedCaptionToken,
       minimumCaptionVolume = zsfx.m_minimumCaptionVolume,
@@ -101,12 +107,9 @@ public class SoundManager
       DataKeys.Add(d.name);
       var prefab = zs.GetPrefab(d.name);
       if (prefab == null)
-      {
-        if (IsServer())
-          Log.Warning($"No prefab found for '{d.name}'.");
-        continue;
-      }
-      UpdatePrefab(prefab, d);
+        CreatePrefab(d);
+      else
+        UpdatePrefab(prefab, d);
     }
   }
 
@@ -114,9 +117,31 @@ public class SoundManager
   {
     Yaml.Setup(Pattern, FromFile);
   }
-
+  static void CreatePrefab(SoundData data)
+  {
+    var go = new GameObject(data.name);
+    go.transform.parent = EWM.ParentObj.transform;
+    go.AddComponent<ZNetView>();
+    var source = go.AddComponent<AudioSource>();
+    source.outputAudioMixerGroup = AudioMan.instance.m_ambientMixer;
+    go.AddComponent<TimedDestruction>();
+    go.AddComponent<ZSFX>();
+    UpdatePrefab(go, data);
+    var hash = go.name.GetStableHashCode();
+    ZNetScene.instance.m_prefabs.Add(go);
+    ZNetScene.instance.m_namedPrefabs.Add(hash, go);
+  }
   static void UpdatePrefab(GameObject go, SoundData data)
   {
+    var zNetView = go.GetComponent<ZNetView>();
+    if (zNetView)
+      zNetView.m_persistent = data.persistent;
+    var timedDestruction = go.GetComponent<TimedDestruction>();
+    if (timedDestruction)
+    {
+      timedDestruction.m_triggerOnAwake = data.triggerTimeout;
+      timedDestruction.m_timeout = data.timeout;
+    }
     var zsfx = go.GetComponent<ZSFX>();
     if (!zsfx) return;
     zsfx.m_playOnAwake = data.playOnAwake;
@@ -144,7 +169,7 @@ public class SoundManager
   }
 }
 
-[HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.Start)), HarmonyPriority(Priority.Last)]
+[HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPriority(Priority.Last)]
 public class InitializeObjectContent
 {
   static void Postfix()
