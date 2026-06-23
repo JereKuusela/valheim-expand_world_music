@@ -2,7 +2,7 @@
   "name": "Expand_World_Music",
   "version_number": "1.14.0",
   "website_url": "https://discord.gg/VFRJcPwUdm",
-  "description": "Allows changing event and environment musics.",
+  "description": "Allows changing event, environment and location musics. Also allows adding new sound effects.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333",
     "ValheimModding-YamlDotNet-16.3.0"

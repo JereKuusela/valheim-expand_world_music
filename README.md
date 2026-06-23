@@ -1,6 +1,6 @@
 # Expand World Music
 
-Allows changing event and environment musics.
+Allows changing event, environment and location musics. Also allows adding new sound effects.
 
 Install on all clients and the server (modding [guide](https://youtu.be/L9ljm2eKLrk)).
 
