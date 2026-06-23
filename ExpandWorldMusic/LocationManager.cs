@@ -80,17 +80,35 @@ public class InitializeLocationContent
   }
 }
 
-
+// There are few cases to consider.
+// 1. MusicLocation can appear as a separate object (inactive in the location): Location must be found by position.
+// 2. MusicLocation can appear directly in the Location object: Must be reused, ZNetView can be bridged from LocationProxy to MusicLocation.
+// 3. No music location: Must be added to LocationProxy (because blueprints won't have Location so can't use that).
 [HarmonyPatch]
 public class LocationPatch
 {
   static readonly int ReferenceHash = "locationreference".GetStableHashCode();
 
+  [HarmonyPatch(typeof(MusicLocation), nameof(MusicLocation.Awake)), HarmonyPostfix]
+  static void HandleMusicLocation(MusicLocation __instance)
+  {
+    // Already handled directly in HandleProxy.
+    if (__instance.GetComponent<LocationProxy>() || __instance.GetComponent<Location>()) return;
+    // Separate component doesn't have direct link to Location, so have to find by position.
+    var loc = Location.GetLocation(__instance.transform.position);
+    if (!loc) return;
+    var name = Utils.GetPrefabName(loc?.name ?? __instance.gameObject.name);
+    var hash = name.GetStableHashCode();
+    if (!LocationManager.Data.TryGetValue(hash, out var data)) return;
+    Apply(__instance, data);
+  }
+
   [HarmonyPatch(typeof(LocationProxy), nameof(LocationProxy.SpawnLocation)), HarmonyPostfix]
-  static void SpawnLocation(LocationProxy __instance)
+  static void HandleProxy(LocationProxy __instance)
   {
     if (!__instance.m_nview) return;
-    // This function will be recalled later if spawn was delayed, so skip for now.
+    // Location must be spawned before the correct way can be determined.
+    // So if delayed, this will be called again after spawn.
     if (__instance.m_locationNeedsSpawn) return;
     var zdo = __instance.m_nview.GetZDO();
     // Expand World Data adds this so that clones and blueprints can be referenced.
@@ -98,21 +116,31 @@ public class LocationPatch
     if (hash == 0)
       hash = zdo.GetInt(ZDOVars.s_location);
     if (!LocationManager.Data.TryGetValue(hash, out var data)) return;
-    var music = EnsureMusic(__instance);
+    var music = GetMusic(__instance);
     if (!music) return;
     Apply(music, data);
   }
 
-  private static MusicLocation EnsureMusic(LocationProxy proxy)
+  private static MusicLocation? GetMusic(LocationProxy proxy)
   {
     var go = proxy.gameObject;
-    // Instance might already have MusicLocation component, so prefer using that.
+    // Instance might already have MusicLocation component, no point adding another one.
     if (proxy.m_instance)
       go = proxy.m_instance.gameObject;
-    var music = go.GetComponent<MusicLocation>();
+    var music = go.GetComponentInChildren<MusicLocation>(true);
+    // Must check if the MusicLocation spawns as a separate object.
+    if (music && music.GetComponent<ZNetView>() != proxy.m_nview)
+      return null;
     if (!music)
     {
-      go.AddComponent<AudioSource>();
+      var audio = go.AddComponent<AudioSource>();
+      audio.maxDistance = 999f;
+      audio.minDistance = 0f;
+      audio.priority = 0;
+      audio.reverbZoneMix = 0f;
+      audio.playOnAwake = false;
+      audio.rolloffMode = AudioRolloffMode.Linear;
+      audio.outputAudioMixerGroup = AudioMan.instance.m_masterMixer.FindMatchingGroups("Music_ontop")[0];
       music = go.AddComponent<MusicLocation>();
     }
     if (!music.m_nview)
@@ -131,10 +159,14 @@ public class LocationPatch
     music.m_oneTime = data.oneTime;
     music.m_radius = data.radius;
     music.m_addRadiusFromLocation = data.radiusFromLocation;
+    music.m_baseVolume = data.volume;
     var audioSource = music.m_audioSource;
     if (!audioSource) return;
     audioSource.volume = data.volume;
     audioSource.loop = data.loop;
+    audioSource.pitch = data.pitch;
+    if (data.mixerGroup != null)
+      audioSource.outputAudioMixerGroup = AudioMan.instance.m_masterMixer.FindMatchingGroups(data.mixerGroup)[0];
     var clip = Clips.GetRandomClip(data.clips);
     if (clip != null)
       audioSource.clip = clip;

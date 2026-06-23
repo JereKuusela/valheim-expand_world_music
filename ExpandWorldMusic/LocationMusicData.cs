@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace ExpandWorld.Music;
 
@@ -11,10 +12,13 @@ public class LocationData
   public float volume = 0f;
   public bool radiusFromLocation = false;
   public float radius = 10f;
+  [DefaultValue(1f)]
+  public float pitch = 1f;
   public bool loop = false;
   public bool oneTime = false;
   public bool notIfEnemies = false;
   public bool forceFade = false;
+  public string? mixerGroup = null;
 }
 
 // Comparer for LocationData

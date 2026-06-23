@@ -47,12 +47,17 @@ Command `ew_musics` can be used list all available clips to the log file.
 - name: Id of the location.
 - clips: List of music files.
 - volume (default `0.0`): Volume of the music.
+- pitch (default `1.0`): Pitch of the music.
 - loop (default `false`): If true, the music restarts automatically when it ends.
 - oneTime (default `false`): If true, the music is played only once per location.
 - notIfEnemies (default `false`): If true, the music is not played if there are enemies nearby.
 - forceFade (default `false`): If true, the volume is lowered when the music is near ending.
 - radius (default `10.0`): Radius of the music area in meters.
 - radiusFromLocation (default `false`): If true, radius of the location is added to the music radius.
+- mixerGroup (default: `Music_ontop`): Name of the audio mixer group.
+  - Default group mutes the main music when the location music is playing.
+  - Command `ew_mixers` can be used to list available mixer groups.
+  - Some options are: Master, GUI, Music, Music_ontop, Effects, Ambient, SFX, SFX_LARGE
 
 ### expand_sounds.yaml
 
