@@ -22,7 +22,7 @@ public class LocationData
 }
 
 // Comparer for LocationData
-public class LocationDataComparer : System.Collections.Generic.IEqualityComparer<LocationData>
+public class LocationDataComparer : IEqualityComparer<LocationData>
 {
   public bool Equals(LocationData? x, LocationData? y) => x?.name == y?.name;
 
