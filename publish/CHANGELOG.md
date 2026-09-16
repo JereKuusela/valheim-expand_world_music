@@ -1,3 +1,6 @@
+- 1.15
+  - Fixes for the new game update.
+
 - 1.14
   - Adds new field `pitch` for location music.
   - Adds new field `mixerGroup` for location music.
@@ -15,7 +18,3 @@
 
 - 1.11
   - Fixes error near some locations. This was caused by incorrect default value for field `oneTime`.
-
-- 1.10
-  - Adds a message to the `ew_musics` command to indicate that the available music clips were printed to the log file.
-  - Fixes config directory not being automatically created.
