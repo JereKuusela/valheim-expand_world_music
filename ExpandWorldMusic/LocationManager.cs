@@ -70,7 +70,7 @@ public class LocationManager
 }
 
 
-[HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.Start)), HarmonyPriority(Priority.Last)]
+[HarmonyPatch(typeof(ZoneSystem), "Start"), HarmonyPriority(Priority.Last)]
 public class InitializeLocationContent
 {
   static void Postfix()
@@ -89,7 +89,7 @@ public class LocationPatch
 {
   static readonly int ReferenceHash = "locationreference".GetStableHashCode();
 
-  [HarmonyPatch(typeof(MusicLocation), nameof(MusicLocation.Awake)), HarmonyPostfix]
+  [HarmonyPatch(typeof(MusicLocation), "Awake"), HarmonyPostfix]
   static void HandleMusicLocation(MusicLocation __instance)
   {
     // Already handled directly in HandleProxy.
@@ -103,33 +103,35 @@ public class LocationPatch
     Apply(__instance, data);
   }
 
-  [HarmonyPatch(typeof(LocationProxy), nameof(LocationProxy.SpawnLocation)), HarmonyPostfix]
+  [HarmonyPatch(typeof(LocationProxy), "SpawnLocation"), HarmonyPostfix]
   static void HandleProxy(LocationProxy __instance)
   {
-    if (!__instance.m_nview) return;
+    var proxyNetView = GameAccess.LocationProxyNetView(__instance);
+    if (!proxyNetView) return;
     // Location must be spawned before the correct way can be determined.
     // So if delayed, this will be called again after spawn.
-    if (__instance.m_locationNeedsSpawn) return;
-    var zdo = __instance.m_nview.GetZDO();
+    if (GameAccess.LocationProxyNeedsSpawn(__instance)) return;
+    var zdo = proxyNetView.GetZDO();
     // Expand World Data adds this so that clones and blueprints can be referenced.
     var hash = zdo.GetInt(ReferenceHash);
     if (hash == 0)
       hash = zdo.GetInt(ZDOVars.s_location);
     if (!LocationManager.Data.TryGetValue(hash, out var data)) return;
-    var music = GetMusic(__instance);
+    var music = GetMusic(__instance, proxyNetView);
     if (!music) return;
     Apply(music, data);
   }
 
-  private static MusicLocation? GetMusic(LocationProxy proxy)
+  private static MusicLocation? GetMusic(LocationProxy proxy, ZNetView proxyNetView)
   {
     var go = proxy.gameObject;
     // Instance might already have MusicLocation component, no point adding another one.
-    if (proxy.m_instance)
-      go = proxy.m_instance.gameObject;
+    var proxyInstance = GameAccess.LocationProxyInstance(proxy);
+    if (proxyInstance)
+      go = proxyInstance.gameObject;
     var music = go.GetComponentInChildren<MusicLocation>(true);
     // Must check if the MusicLocation spawns as a separate object.
-    if (music && music.GetComponent<ZNetView>() != proxy.m_nview)
+    if (music && music.GetComponent<ZNetView>() != proxyNetView)
       return null;
     if (!music)
     {
@@ -143,12 +145,13 @@ public class LocationPatch
       audio.outputAudioMixerGroup = AudioMan.instance.m_masterMixer.FindMatchingGroups("Music_ontop")[0];
       music = go.AddComponent<MusicLocation>();
     }
-    if (!music.m_nview)
+    ref var musicNetView = ref GameAccess.MusicLocationNetView(music);
+    if (!musicNetView)
     {
       // Location probably doesn't have ZNetView but LocationProxy has, so bridge that to extend support.
-      music.m_nview = proxy.m_nview;
-      if (music.m_nview)
-        music.m_nview.Register("SetPlayed", music.SetPlayed);
+      musicNetView = proxyNetView;
+      if (musicNetView)
+        musicNetView.Register("SetPlayed", (long sender) => GameAccess.SetPlayed(music, sender));
     }
     return music;
   }
@@ -159,8 +162,8 @@ public class LocationPatch
     music.m_oneTime = data.oneTime;
     music.m_radius = data.radius;
     music.m_addRadiusFromLocation = data.radiusFromLocation;
-    music.m_baseVolume = data.volume;
-    var audioSource = music.m_audioSource;
+    GameAccess.MusicLocationBaseVolume(music) = data.volume;
+    var audioSource = music.GetComponent<AudioSource>();
     if (!audioSource) return;
     audioSource.volume = data.volume;
     audioSource.loop = data.loop;

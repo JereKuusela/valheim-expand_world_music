@@ -3,7 +3,7 @@ using HarmonyLib;
 
 namespace ExpandWorld.Music;
 
-[HarmonyPatch(typeof(Terminal), nameof(Terminal.InitTerminal))]
+[HarmonyPatch(typeof(Terminal), "InitTerminal")]
 public class SetCommands
 {
   static void Postfix()

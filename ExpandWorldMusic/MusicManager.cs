@@ -53,9 +53,9 @@ public class MusicManager
     Log.Info($"Reloading music data ({musicList.Count} entries).");
     MusicMan.instance.m_music = musicList;
     UpdateHashes();
-    var current = MusicMan.instance.m_currentMusic?.m_name ?? "";
+    var current = GameAccess.GetCurrentMusic(MusicMan.instance);
     MusicMan.instance.Reset();
-    MusicMan.instance.StartMusic(current);
+    GameAccess.StartMusic(MusicMan.instance, current);
   }
   private static bool AddMissingEntries(List<MusicMan.NamedMusic> entries)
   {
@@ -77,12 +77,13 @@ public class MusicManager
   private static void UpdateHashes()
   {
     var mm = MusicMan.instance;
-    mm.m_musicHashes.Clear();
+    var hashes = GameAccess.MusicHashes(mm);
+    hashes.Clear();
     foreach (MusicMan.NamedMusic music in mm.m_music)
     {
       if (!music.m_enabled) continue;
       if (music.m_clips.Length == 0 || music.m_clips[0] == null) continue;
-      mm.m_musicHashes.Add(music.m_name.GetStableHashCode(), music);
+      hashes.Add(music.m_name.GetStableHashCode(), music);
     }
   }
   public static void SetupWatcher()
@@ -92,7 +93,7 @@ public class MusicManager
 }
 
 
-[HarmonyPatch(typeof(MusicMan), nameof(MusicMan.Awake)), HarmonyPriority(Priority.Last)]
+[HarmonyPatch(typeof(MusicMan), "Awake"), HarmonyPriority(Priority.Last)]
 public class InitializeContent
 {
   static void Postfix()

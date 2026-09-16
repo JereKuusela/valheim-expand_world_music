@@ -22,7 +22,8 @@ public class SoundManager
       Yaml.WriteFile(FileName, "");
     if (Yaml.Exists(ReferenceFileName)) return;
 
-    var zsfxComponents = ZNetScene.instance.m_namedPrefabs.Values.Select(go => go.GetComponent<ZSFX>()).Where(zsfx => zsfx).ToList();
+    var namedPrefabs = GameAccess.NamedPrefabs(ZNetScene.instance);
+    var zsfxComponents = namedPrefabs.Values.Select(go => go.GetComponent<ZSFX>()).Where(zsfx => zsfx).ToList();
     var objectDataList = zsfxComponents
       .Select(ToData)
       .Where(m => m != null).Select(m => m!)
@@ -129,7 +130,7 @@ public class SoundManager
     UpdatePrefab(go, data);
     var hash = go.name.GetStableHashCode();
     ZNetScene.instance.m_prefabs.Add(go);
-    ZNetScene.instance.m_namedPrefabs.Add(hash, go);
+    GameAccess.NamedPrefabs(ZNetScene.instance).Add(hash, go);
   }
   static void UpdatePrefab(GameObject go, SoundData data)
   {
@@ -169,7 +170,7 @@ public class SoundManager
   }
 }
 
-[HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPriority(Priority.Last)]
+[HarmonyPatch(typeof(ZNetScene), "Awake"), HarmonyPriority(Priority.Last)]
 public class InitializeObjectContent
 {
   static void Postfix()
