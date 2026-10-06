@@ -88,11 +88,13 @@ public class Clips
     try
     {
       var loader = UnityWebRequestMultimedia.GetAudioClip(uri, AudioType.UNKNOWN) ?? throw new Exception();
+      var downloadHandlerAudioClip = (DownloadHandlerAudioClip)loader.downloadHandler;
+      // Stream the clip while it plays. The default decodes the whole clip on load, which takes about 10 MB of memory per minute of audio.
+      downloadHandlerAudioClip.streamAudio = true;
       loader.SendWebRequest();
       while (!loader.isDone)
       {
       }
-      var downloadHandlerAudioClip = (DownloadHandlerAudioClip)loader.downloadHandler;
       var clip = downloadHandlerAudioClip.audioClip ?? throw new Exception();
       clip.name = Path.GetFileNameWithoutExtension(path);
       return clip;
