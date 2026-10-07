@@ -17,7 +17,7 @@ public class Clips
     AudioClips ??= InitializeDefaultClips();
     if (AudioClips.ContainsKey(name))
       return AudioClips[name];
-    var clip = PreloadClipCoroutine(name);
+    var clip = PreloadClip(name);
     if (clip != null)
       AudioClips[name] = clip;
     return clip;
@@ -75,7 +75,7 @@ public class Clips
     }
     return audioClips;
   }
-  private static AudioClip? PreloadClipCoroutine(string path)
+  private static AudioClip? PreloadClip(string path)
   {
     if (!File.Exists(path))
       path = Path.Combine(Yaml.YamlDirectory, path);
@@ -84,24 +84,28 @@ public class Clips
       Log.Warning($"Can't find audio clip at {path}");
       return null;
     }
-    var uri = "file:///" + path.Replace("\\", "/");
+
     try
     {
-      var loader = UnityWebRequestMultimedia.GetAudioClip(uri, AudioType.UNKNOWN) ?? throw new Exception();
+      var uri = new Uri(Path.GetFullPath(path)).AbsoluteUri;
+      var loader = UnityWebRequestMultimedia.GetAudioClip(uri, AudioType.UNKNOWN) ?? throw new Exception("Failed to create request.");
       var downloadHandlerAudioClip = (DownloadHandlerAudioClip)loader.downloadHandler;
-      // Stream the clip while it plays. The default decodes the whole clip on load, which takes about 10 MB of memory per minute of audio.
-      downloadHandlerAudioClip.streamAudio = true;
+      // Decoding the whole clip on load takes about 10 MB of memory per minute of audio.
+      downloadHandlerAudioClip.streamAudio = EWM.StreamAudio.Value;
       loader.SendWebRequest();
-      while (!loader.isDone)
+      var sw = System.Diagnostics.Stopwatch.StartNew();
+      while (!loader.isDone && sw.ElapsedMilliseconds < 10000)
       {
       }
-      var clip = downloadHandlerAudioClip.audioClip ?? throw new Exception();
+      if (!loader.isDone) throw new TimeoutException("Timed out.");
+      if (loader.result != UnityWebRequest.Result.Success) throw new Exception(loader.error);
+      var clip = downloadHandlerAudioClip.audioClip ?? throw new Exception("No audio clip.");
       clip.name = Path.GetFileNameWithoutExtension(path);
       return clip;
     }
-    catch
+    catch (Exception e)
     {
-      Log.Warning("Failed to load audio clip at " + path);
+      Log.Warning($"Failed to load audio clip at {path}: {e.Message}");
     }
     return null;
   }
@@ -110,7 +114,7 @@ public class Clips
 public class Comparer : IEqualityComparer<AudioClip>
 {
   // Respawn has a null clip.
-  public bool Equals(AudioClip x, AudioClip y) => x.name == y.name;
+  public bool Equals(AudioClip? x, AudioClip? y) => x?.name == y?.name;
 
-  public int GetHashCode(AudioClip obj) => obj.name.GetStableHashCode();
+  public int GetHashCode(AudioClip obj) => (obj?.name ?? "").GetStableHashCode();
 }

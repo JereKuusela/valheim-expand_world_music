@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using ServerSync;
 using Service;
@@ -12,7 +13,7 @@ public class EWM : BaseUnityPlugin
 {
   public const string GUID = "expand_world_music";
   public const string NAME = "Expand World Music";
-  public const string VERSION = "1.15";
+  public const string VERSION = "1.16";
 
 #nullable disable
   public static CustomSyncedValue<List<Data>> valueMusicData;
@@ -26,8 +27,10 @@ public class EWM : BaseUnityPlugin
     IsLocked = true
   };
   public static GameObject ParentObj = new("ExpandWorldMusic");
+  public static ConfigEntry<bool> StreamAudio = null!;
   public void Awake()
   {
+    StreamAudio = Config.Bind("1. General", "Stream audio", true, "Streams custom clips instead of decoding them fully into memory (saves about 10 MB per minute of audio). Applies to clips loaded afterwards.");
     ParentObj.SetActive(false);
     DontDestroyOnLoad(ParentObj);
     Log.Init(Logger);
